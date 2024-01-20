@@ -1,0 +1,62 @@
+
+<!DOCTYPE html> 
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <title>Gregorian to Hebrew Date Converter</title> <!-- Title of the document shown in the browser's title bar or tab -->
+    <link rel="stylesheet" type="text/css" href="styles.css">  <!-- Link to the external CSS file -->
+
+
+</head>
+
+<body>
+    <h1>Gregorian to Hebrew Date Converter</h1> <!-- Main heading of the page -->
+    
+    <label for="gregorian-date">Enter Gregorian Date:</label> <!-- Label for the date input field -->
+    <input type="date" id="gregorian-date"  > <!-- Date input field -->
+    <button onclick="convertToHebrew()">Convert</button> <!-- Button to trigger date conversion -->
+    <p id="hebrew-date-result"></p> <!-- Paragraph element to display the conversion result -->
+
+    <script>
+        // this line is load when the js code load
+        document.getElementById('gregorian-date').value = new Date().toISOString().split('T')[0]
+
+        async function convertToHebrew() {
+            // This function is called when the 'Convert' button is clicked.
+            const gregorianDateInput = document.getElementById('gregorian-date'); // Gets the gregorian date input element
+            const hebrewDateResult = document.getElementById('hebrew-date-result'); // Gets the element where the result will be displayed
+            const gregorianDate = gregorianDateInput.value; // Retrieves the value from the date input field
+            if (!gregorianDate) {
+                alert('Please enter a valid foreign date.'); // Alerts the user if no date is entered
+                return; // Exits the function if no date is entered
+            }
+
+            hebrewDateResult.textContent = ''; // Clears any previous result text
+
+            try {
+                
+                const apiUrl = `https://www.hebcal.com/converter?cfg=json&date=${gregorianDate}&g2h=1&strict=1`; // Constructs the API URL
+                const response = await fetch(apiUrl); // Fetches data from the API
+                const data = await response.json(); // Parses the JSON response
+
+                if (data && data.heDateParts) { // Checks if data and date parts are present in the response
+                    const { y, m, d } = data.heDateParts; // Destructures the year, month, and day from the response
+                    if (y && m && d) {
+                        hebrewDateResult.textContent = `Hebrew Date: ${y} ${m} ${d}`; // Displays the converted date
+                    } else {
+                        hebrewDateResult.textContent = 'Error: Invalid response format.'; // Error message for invalid response format
+                    }
+                } else {
+                    hebrewDateResult.textContent = `Error: Hebrew date not found for the specified foreign date ${gregorianDate}.`; // Error message when date not found
+                }
+            } catch (error) {
+                console.error('Error fetching data from Hebcal API:', error); // Logs any fetch errors to the console
+                hebrewDateResult.textContent = 'Error: Unable to fetch Hebrew date. Please check your internet connection.'; // Error message for fetch failure
+            } 
+            
+        }
+    </script> 
+</body>
+
+</html> 
